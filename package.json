@@ -7,7 +7,9 @@
     "node": ">=20.19 <21"
   },
   "scripts": {
-    "dev": "pnpm --filter @rps/server dev",
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm --filter @rps/web build",
+    "test:e2e": "playwright test",
     "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -17,6 +19,7 @@
     "play:match": "tsx scripts/play-match.ts"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@types/node": "^20.19.43",
     "eslint": "^9.39.5",
     "prettier": "^3.10.1",

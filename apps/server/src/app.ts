@@ -164,6 +164,92 @@ function winnerFromMoves(a: Move, b: Move, aId: string, bId: string): string | n
   return (a === 1 && b === 3) || (a === 2 && b === 1) || (a === 3 && b === 2) ? aId : bId;
 }
 
+async function advanceTournament(db: Kysely<DB>, match: DB['matches']) {
+  const tournament = await db
+    .selectFrom('tournaments')
+    .selectAll()
+    .where('id', '=', match.tournament_id)
+    .executeTakeFirstOrThrow();
+  if (match.stage >= Math.log2(tournament.capacity)) {
+    await db
+      .updateTable('tournaments')
+      .set({ status: 'COMPLETE' })
+      .where('id', '=', tournament.id)
+      .execute();
+    await appendAudit(db, 'tournament_completed', {
+      tournamentId: tournament.id,
+      winnerUserId: match.winner_user_id,
+    });
+    return;
+  }
+  const siblingPosition = match.position % 2 === 1 ? match.position + 1 : match.position - 1;
+  const sibling = await db
+    .selectFrom('matches')
+    .selectAll()
+    .where('tournament_id', '=', match.tournament_id)
+    .where('stage', '=', match.stage)
+    .where('position', '=', siblingPosition)
+    .executeTakeFirst();
+  if (!sibling?.winner_user_id || !match.winner_user_id) return;
+  const nextPosition = Math.ceil(match.position / 2);
+  const first = match.position % 2 === 1 ? match.winner_user_id : sibling.winner_user_id;
+  const second = match.position % 2 === 1 ? sibling.winner_user_id : match.winner_user_id;
+  let nextMatchId: string | null = null;
+  try {
+    nextMatchId = await db.transaction().execute(async (trx) => {
+      const existing = await trx
+        .selectFrom('matches')
+        .select('id')
+        .where('tournament_id', '=', tournament.id)
+        .where('stage', '=', match.stage + 1)
+        .where('position', '=', nextPosition)
+        .executeTakeFirst();
+      if (existing) return null;
+      const id = randomUUID();
+      await trx
+        .insertInto('matches')
+        .values({
+          id,
+          tournament_id: tournament.id,
+          player_a_id: first,
+          player_b_id: second,
+          status: 'ACTIVE',
+          stage: match.stage + 1,
+          position: nextPosition,
+          wins_required: 2,
+          winner_user_id: null,
+          created_at: now(),
+        })
+        .execute();
+      await trx
+        .insertInto('rounds')
+        .values({
+          id: randomUUID(),
+          match_id: id,
+          round_no: 1,
+          status: 'COMMIT',
+          commit_deadline: deadline(120),
+          reveal_deadline: null,
+          winner_user_id: null,
+          created_at: now(),
+        })
+        .execute();
+      return id;
+    });
+  } catch (error) {
+    const code = error && typeof error === 'object' && 'code' in error ? error.code : null;
+    if (code !== '23505' && code !== 'SQLITE_CONSTRAINT_UNIQUE') throw error;
+  }
+  if (nextMatchId)
+    await appendAudit(db, 'match_created', {
+      tournamentId: tournament.id,
+      matchId: nextMatchId,
+      stage: match.stage + 1,
+      position: nextPosition,
+      players: [first, second],
+    });
+}
+
 async function resolveRound(
   db: Kysely<DB>,
   match: DB['matches'],
@@ -206,8 +292,6 @@ async function resolveRound(
     .where('status', '!=', 'RESOLVED')
     .execute();
   if (update[0]?.numUpdatedRows === 0n) return;
-  await db.updateTable('matches').set({ status: 'RESOLVED' }).where('id', '=', match.id).execute();
-  // Openings become public only after the barrier or a deadline; never before.
   await appendAudit(db, 'round_resolved', {
     matchId: match.id,
     roundNo: round.round_no,
@@ -220,35 +304,84 @@ async function resolveRound(
       valid: r.valid === 1,
     })),
   });
+  const finished = await db
+    .selectFrom('rounds')
+    .select(['winner_user_id'])
+    .where('match_id', '=', match.id)
+    .where('status', '=', 'RESOLVED')
+    .execute();
+  const wins = finished.filter((r) => r.winner_user_id === winner).length;
+  const forfeited = reason !== 'both_revealed' || reveals.some((r) => r.valid === 0);
+  if (winner && (forfeited || wins >= match.wins_required)) {
+    const updated = await db
+      .updateTable('matches')
+      .set({ status: 'RESOLVED', winner_user_id: winner })
+      .where('id', '=', match.id)
+      .where('status', '=', 'ACTIVE')
+      .execute();
+    if (updated[0]?.numUpdatedRows !== 0n) {
+      await appendAudit(db, 'match_resolved', { matchId: match.id, winnerUserId: winner });
+      await advanceTournament(db, { ...match, status: 'RESOLVED', winner_user_id: winner });
+    }
+  } else if (forfeited && !winner) {
+    await db
+      .updateTable('matches')
+      .set({ status: 'ABANDONED' })
+      .where('id', '=', match.id)
+      .execute();
+    await db
+      .updateTable('tournaments')
+      .set({ status: 'BLOCKED' })
+      .where('id', '=', match.tournament_id)
+      .execute();
+    await appendAudit(db, 'match_abandoned', { matchId: match.id });
+  } else {
+    await db
+      .insertInto('rounds')
+      .values({
+        id: randomUUID(),
+        match_id: match.id,
+        round_no: round.round_no + 1,
+        status: 'COMMIT',
+        commit_deadline: deadline(120),
+        reveal_deadline: null,
+        winner_user_id: null,
+        created_at: now(),
+      })
+      .execute();
+  }
 }
 
-async function getMatchAndRound(db: Kysely<DB>, matchId: string, roundNo = 1) {
+async function getMatchAndRound(db: Kysely<DB>, matchId: string, roundNo?: number) {
   const match = await db
     .selectFrom('matches')
     .selectAll()
     .where('id', '=', matchId)
     .executeTakeFirst();
   if (!match) return null;
-  const round = await db
-    .selectFrom('rounds')
-    .selectAll()
-    .where('match_id', '=', matchId)
-    .where('round_no', '=', roundNo)
-    .executeTakeFirst();
+  const query = db.selectFrom('rounds').selectAll().where('match_id', '=', matchId);
+  const round =
+    roundNo === undefined
+      ? await query.orderBy('round_no', 'desc').executeTakeFirst()
+      : await query.where('round_no', '=', roundNo).executeTakeFirst();
   if (!round) return null;
   if (round.status === 'COMMIT' && now() > round.commit_deadline) {
     await resolveRound(db, match, round, 'commit_deadline');
   } else if (round.status === 'REVEAL' && round.reveal_deadline && now() > round.reveal_deadline) {
     await resolveRound(db, match, round, 'reveal_deadline');
   }
-  const latest = await db
-    .selectFrom('rounds')
+  const latestMatch = await db
+    .selectFrom('matches')
     .selectAll()
-    .where('id', '=', round.id)
+    .where('id', '=', matchId)
     .executeTakeFirstOrThrow();
-  return { match, round: latest };
+  const freshQuery = db.selectFrom('rounds').selectAll().where('match_id', '=', matchId);
+  const latestRound =
+    roundNo === undefined
+      ? await freshQuery.orderBy('round_no', 'desc').executeTakeFirstOrThrow()
+      : await freshQuery.where('round_no', '=', roundNo).executeTakeFirstOrThrow();
+  return { match: latestMatch, round: latestRound };
 }
-
 export async function buildApp(db: Kysely<DB>, production = false) {
   const app = Fastify({ logger: false, bodyLimit: 16 * 1024 });
   await app.register(helmet);
@@ -395,6 +528,63 @@ export async function buildApp(db: Kysely<DB>, production = false) {
     return { id: keyId, revokedAt };
   });
 
+  app.post('/api/keys/rotate', async (request, reply) => {
+    const userId = await currentUser(db, request);
+    if (!userId) return reply.code(401).send({ error: 'sign in required' });
+    const body = z
+      .object({ oldKeyId: idSchema, publicKey: publicJwk })
+      .strict()
+      .parse(request.body);
+    const cleanKey = { kty: 'EC', crv: 'P-256', x: body.publicKey.x, y: body.publicKey.y };
+    try {
+      await webcrypto.subtle.importKey(
+        'jwk',
+        cleanKey,
+        { name: 'ECDSA', namedCurve: 'P-256' },
+        false,
+        ['verify'],
+      );
+    } catch {
+      return reply.code(400).send({ error: 'invalid P-256 public key' });
+    }
+    const result = await db.transaction().execute(async (trx) => {
+      const oldKey = await trx
+        .selectFrom('public_keys')
+        .selectAll()
+        .where('id', '=', body.oldKeyId)
+        .executeTakeFirst();
+      if (!oldKey || oldKey.user_id !== userId) return { code: 404, error: 'key not found' };
+      if (oldKey.revoked_at) return { code: 409, error: 'key already revoked' };
+      const id = randomUUID();
+      const rotatedAt = now();
+      await trx
+        .insertInto('public_keys')
+        .values({
+          id,
+          user_id: userId,
+          jwk: JSON.stringify(cleanKey),
+          created_at: rotatedAt,
+          revoked_at: null,
+        })
+        .execute();
+      await trx
+        .updateTable('public_keys')
+        .set({ revoked_at: rotatedAt })
+        .where('id', '=', oldKey.id)
+        .execute();
+      return { id, rotatedAt };
+    });
+    if ('error' in result) return reply.code(result.code ?? 500).send({ error: result.error });
+    await appendAudit(db, 'key_rotated', {
+      userId,
+      oldKeyId: body.oldKeyId,
+      newKeyId: result.id,
+      publicKey: cleanKey,
+      rotatedAt: result.rotatedAt,
+    });
+    return reply.code(201).send(result);
+  });
+
   app.get('/api/keys', async (request, reply) => {
     const userId = await currentUser(db, request);
     if (!userId) return reply.code(401).send({ error: 'sign in required' });
@@ -403,6 +593,16 @@ export async function buildApp(db: Kysely<DB>, production = false) {
       .select(['id', 'jwk', 'created_at', 'revoked_at'])
       .where('user_id', '=', userId)
       .execute();
+  });
+
+  app.get('/api/keys/:id', async (request, reply) => {
+    const { id } = routeId.parse(request.params);
+    const key = await db
+      .selectFrom('public_keys')
+      .select(['id', 'user_id', 'jwk', 'created_at', 'revoked_at'])
+      .where('id', '=', id)
+      .executeTakeFirst();
+    return key ?? reply.code(404).send({ error: 'key not found' });
   });
 
   app.post('/api/tournaments', async (request, reply) => {
@@ -449,9 +649,10 @@ export async function buildApp(db: Kysely<DB>, production = false) {
     if (!tournament) return reply.code(404).send({ error: 'tournament not found' });
     const participants = await db
       .selectFrom('participants')
-      .select(['user_id', 'slot'])
-      .where('tournament_id', '=', id)
-      .orderBy('slot')
+      .innerJoin('users', 'users.id', 'participants.user_id')
+      .select(['participants.user_id', 'participants.slot', 'users.username'])
+      .where('participants.tournament_id', '=', id)
+      .orderBy('participants.slot')
       .execute();
     const matches = await db
       .selectFrom('matches')
@@ -496,6 +697,10 @@ export async function buildApp(db: Kysely<DB>, production = false) {
             player_a_id: players[slot - 2]!.user_id,
             player_b_id: userId,
             status: 'ACTIVE',
+            stage: 1,
+            position: slot / 2,
+            wins_required: tournament.capacity === 2 ? 1 : 2,
+            winner_user_id: null,
             created_at: now(),
           })
           .execute();
@@ -544,7 +749,34 @@ export async function buildApp(db: Kysely<DB>, production = false) {
             .where('round_id', '=', found.round.id)
             .execute()
         : undefined;
-    return { match: found.match, round: found.round, commitments, ...(reveals ? { reveals } : {}) };
+    const rounds = await db
+      .selectFrom('rounds')
+      .select(['round_no', 'status', 'winner_user_id'])
+      .where('match_id', '=', id)
+      .orderBy('round_no')
+      .execute();
+    const revealedUserIds = (
+      await db
+        .selectFrom('reveals')
+        .select('user_id')
+        .where('round_id', '=', found.round.id)
+        .execute()
+    ).map((r) => r.user_id);
+    const score = {
+      [found.match.player_a_id]: rounds.filter((r) => r.winner_user_id === found.match.player_a_id)
+        .length,
+      [found.match.player_b_id]: rounds.filter((r) => r.winner_user_id === found.match.player_b_id)
+        .length,
+    };
+    return {
+      match: found.match,
+      round: found.round,
+      rounds,
+      score,
+      commitments,
+      revealedUserIds,
+      ...(reveals ? { reveals } : {}),
+    };
   });
 
   app.post('/api/commit', async (request, reply) => {
@@ -582,8 +814,14 @@ export async function buildApp(db: Kysely<DB>, production = false) {
     if (prior.some((c) => c.user_id === userId))
       return reply.code(409).send({ error: 'already committed' });
     const bytes = Buffer.from(body.commitment, 'hex');
+    const matchCommitments = await db
+      .selectFrom('commitments')
+      .innerJoin('rounds', 'rounds.id', 'commitments.round_id')
+      .select('commitments.commitment')
+      .where('rounds.match_id', '=', match.id)
+      .execute();
     if (
-      prior.some((c) => {
+      matchCommitments.some((c) => {
         const other = Buffer.from(c.commitment, 'hex');
         return other.length === bytes.length && timingSafeEqual(other, bytes);
       })

@@ -35,6 +35,10 @@ export interface DB {
     player_a_id: string;
     player_b_id: string;
     status: string;
+    stage: number;
+    position: number;
+    wins_required: number;
+    winner_user_id: string | null;
     created_at: string;
   };
   rounds: {
@@ -191,6 +195,36 @@ const initial: Migration = {
   },
 };
 
+const bracket: Migration = {
+  async up(db) {
+    await db.schema
+      .alterTable('matches')
+      .addColumn('stage', 'integer', (c) => c.notNull().defaultTo(1))
+      .execute();
+    await db.schema
+      .alterTable('matches')
+      .addColumn('position', 'integer', (c) => c.notNull().defaultTo(1))
+      .execute();
+    await db.schema
+      .alterTable('matches')
+      .addColumn('wins_required', 'integer', (c) => c.notNull().defaultTo(1))
+      .execute();
+    await db.schema.alterTable('matches').addColumn('winner_user_id', 'text').execute();
+    await db.schema
+      .createIndex('matches_bracket_unique')
+      .on('matches')
+      .columns(['tournament_id', 'stage', 'position'])
+      .unique()
+      .execute();
+  },
+  async down(db) {
+    await db.schema.dropIndex('matches_bracket_unique').execute();
+    for (const column of ['winner_user_id', 'wins_required', 'position', 'stage']) {
+      await db.schema.alterTable('matches').dropColumn(column).execute();
+    }
+  },
+};
+
 export function createDatabase(url: string): Kysely<DB> {
   if (url.startsWith('file:')) {
     const path = url.slice(5);
@@ -213,7 +247,7 @@ export async function migrate(db: Kysely<DB>) {
     db,
     provider: {
       async getMigrations() {
-        return { '001_initial': initial };
+        return { '001_initial': initial, '002_bracket': bracket };
       },
     },
   });
