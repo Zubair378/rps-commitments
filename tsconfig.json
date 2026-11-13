@@ -10,7 +10,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmit": true,
+    "jsx": "react-jsx",
     "types": ["node", "vitest/globals"]
   },
-  "include": ["apps/**/*.ts", "packages/**/*.ts", "scripts/**/*.ts"]
+  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "scripts/**/*.ts"]
 }
