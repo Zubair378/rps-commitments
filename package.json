@@ -1,0 +1,28 @@
+{
+  "name": "rps-commitments",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=20.19 <21"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @rps/server dev",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check:rng": "node scripts/check-rng.mjs",
+    "play:match": "tsx scripts/play-match.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "eslint": "^9.39.5",
+    "prettier": "^3.10.1",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^3.2.7"
+  }
+}
