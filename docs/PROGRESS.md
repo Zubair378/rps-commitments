@@ -6,12 +6,12 @@ The requirement definitions and gates are in [MASTER_INSTRUCTIONS.md](MASTER_INS
 
 - [x] M1 Pedersen commitments and verification — `packages/crypto-core/src/index.test.ts`
 - [x] M2 Salted SHA-256 baseline — known-answer and context tests
-- [ ] M3 Browser-side commitment and secret handling
-- [ ] M4 Two-player commit/reveal game
-- [ ] M5 Tournament lobby and bracket
-- [ ] M6 Signing keys, rotation, and revocation
+- [x] M3 Browser-side commitment and secret handling — Playwright verifies commit payload has no opening
+- [x] M4 Two-player commit/reveal game — two-browser Playwright match
+- [x] M5 Tournament lobby and bracket — four-player API bracket test
+- [x] M6 Signing keys, rotation, and revocation — API test and browser key management
 - [x] M7 Persistent REST/WebSocket backend — API tests and live two-client smoke test
-- [ ] M8 Guided UI and crypto inspector
+- [x] M8 Guided UI and crypto inspector — first-visit tour, match inspector, 375px Playwright check
 - [ ] M9 Attack simulations with fixes
 - [ ] M10 Benchmarks and trade-off analysis
 - [ ] M11 Free public deployment
@@ -20,7 +20,7 @@ The requirement definitions and gates are in [MASTER_INSTRUCTIONS.md](MASTER_INS
 
 ## Should
 
-- [ ] S1 Public hash-chained audit log — chain exists; independent verifier comes in Stage 3
+- [x] S1 Public hash-chained audit log — chain verifier in browser
 - [ ] S2 Homomorphic property lab
 - [ ] S3 Spectator mode
 - [ ] S4 Rate limiting and abuse protection
@@ -37,3 +37,5 @@ The requirement definitions and gates are in [MASTER_INSTRUCTIONS.md](MASTER_INS
 | 0    | Conditional | Node 20, pnpm, workspace ready; third member and collaborator acceptance pending |
 | 1    | Pass        | 9 crypto tests, pinned generator and known-answer vectors                        |
 | 2    | Pass        | 5 API tests and live two-client match script                                     |
+| 3    | Pass        | Two-context Playwright full match and 375px viewport screenshot                  |
+| 4    | Pass        | Key rotation/revocation API tests and key management UI                          |
