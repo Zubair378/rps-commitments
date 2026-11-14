@@ -1,0 +1,21 @@
+sequenceDiagram
+  participant A as Browser A
+  participant R as Referee API
+  participant D as Database
+  participant B as Browser B
+  A->>A: Choose move; sample r; compute C; sign context
+  B->>B: Choose move; sample r; compute C; sign context
+  A->>R: POST /commit {C, signature, keyId}
+  R->>D: Verify signature; store C
+  B->>R: POST /commit {C, signature, keyId}
+  R->>D: Verify signature; store C; enter REVEAL
+  R-->>A: Phase notification
+  R-->>B: Phase notification
+  A->>R: POST /reveal {move, r}
+  R->>D: Hold opening until second reveal
+  B->>R: POST /reveal {move, r}
+  R->>D: Verify both openings; resolve; append audit
+  R-->>A: Public transcript
+  R-->>B: Public transcript
+  A->>A: Verify openings and signatures locally
+  B->>B: Verify openings and signatures locally

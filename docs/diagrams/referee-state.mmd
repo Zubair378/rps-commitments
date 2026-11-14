@@ -1,0 +1,11 @@
+stateDiagram-v2
+  [*] --> WAITING
+  WAITING --> COMMIT: Bracket fills pair
+  COMMIT --> REVEAL: Two valid distinct signed commitments
+  COMMIT --> RESOLVED: Commit deadline / forfeit
+  REVEAL --> RESOLVED: Two openings or reveal deadline
+  RESOLVED --> COMMIT: Tie or more wins required
+  RESOLVED --> NEXT_MATCH: Match winner advances
+  NEXT_MATCH --> WAITING: Next bracket pairing incomplete
+  NEXT_MATCH --> COMMIT: Next bracket pairing complete
+  NEXT_MATCH --> CHAMPION: Final winner

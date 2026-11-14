@@ -36,7 +36,7 @@ The requirement definitions and gates are in [MASTER_INSTRUCTIONS.md](MASTER_INS
 | ---- | ----------- | -------------------------------------------------------------------------------- |
 | 0    | Conditional | Node 20, pnpm, workspace ready; third member and collaborator acceptance pending |
 | 1    | Pass        | 9 crypto tests, pinned generator and known-answer vectors                        |
-| 2    | Pass        | 5 API tests and live two-client match script                                     |
+| 2    | Pass        | 6 API tests and live two-client match script                                     |
 | 3    | Pass        | Two-context Playwright full match and 375px viewport screenshot                  |
 | 4    | Pass        | Key rotation/revocation API tests and key management UI                          |
 | 5    | Pass        | A1–A10 unit tests and browser Attack Lab                                         |

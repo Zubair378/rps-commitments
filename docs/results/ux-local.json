@@ -1,6 +1,6 @@
 {
-  "measuredAt": "2026-11-14T12:32:50.048Z",
+  "measuredAt": "2026-11-14T12:40:56.760Z",
   "environment": "local Chromium to local Vite/Fastify/SQLite",
-  "commitMilliseconds": 386,
-  "secondRevealToVerifiedMilliseconds": 734
+  "commitMilliseconds": 364,
+  "secondRevealToVerifiedMilliseconds": 546
 }

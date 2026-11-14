@@ -1,0 +1,25 @@
+flowchart LR
+  subgraph B[Player browser — trusted for own secrets]
+    UI[React UI]
+    K[IndexedDB private ECDSA key]
+    O[Session storage opening]
+    C[Pedersen / salted SHA-256]
+    UI --> C
+    K --> C
+    C --> O
+  end
+  subgraph R[Render HTTPS origin — referee trust boundary]
+    API[Fastify REST + WebSocket]
+    Rules[Phase, signature, and deadline checks]
+    API --> Rules
+  end
+  subgraph D[Persistent PostgreSQL]
+    DB[(Users, keys, rounds, commitments)]
+    Log[(Hash-chained audit)]
+  end
+  C -- signed commitment only before reveal --> API
+  O -- move + blinding factor after barrier --> API
+  Rules --> DB
+  Rules --> Log
+  API -- public results and audit --> UI
+  DB -. TLS .- API

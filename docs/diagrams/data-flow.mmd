@@ -1,0 +1,12 @@
+flowchart LR
+  M[Plaintext move 1 / 2 / 3] --> C[Browser commitment]
+  RNG[32-byte CSPRNG r] --> C
+  C -->|C + context-bound signature only| NET[HTTPS network]
+  NET --> DB[(Commitment stored)]
+  DB --> Barrier{Both players committed?}
+  Barrier -->|Yes| Reveal[Browser sends move + r]
+  Reveal --> Check[Server verifies C = m·g + r·h]
+  Check --> Log[(Public hash-linked event)]
+  Log --> Browser[Browser independently verifies transcript]
+  M -. stays local until reveal .-> Reveal
+  RNG -. stays local until reveal .-> Reveal
