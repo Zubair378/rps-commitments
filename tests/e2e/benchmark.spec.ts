@@ -19,7 +19,9 @@ test('browser benchmark records 1,000 samples per operation and mode', async ({ 
   };
   expect(data.samples).toHaveLength(6000);
   await mkdir('docs/results', { recursive: true });
-  await writeFile('docs/results/bench-browser.json', JSON.stringify(result, null, 2) + '\n');
+  const snapshot = { ...(result as Record<string, unknown>) };
+  delete snapshot.samples; // Raw observations live in CSV; JSON records methodology and percentiles.
+  await writeFile('docs/results/bench-browser.json', JSON.stringify(snapshot, null, 2) + '\n');
   await writeFile(
     'docs/results/bench-browser.csv',
     [

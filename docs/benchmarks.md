@@ -8,8 +8,8 @@ Run `pnpm bench`, `pnpm bench:browser`, `pnpm bench:timing`, then `python script
 | ----------- | -------------- | ----------------: | --------------: | ----------------: |
 | Node 20     | Pedersen P-256 | 13.1205 / 40.7131 | 0.0017 / 0.0034 | 12.6732 / 19.3355 |
 | Node 20     | Salted SHA-256 |   0.0337 / 0.1161 | 0.0009 / 0.0021 |   0.0143 / 0.0397 |
-| Chromium    | Pedersen P-256 |   2.9000 / 6.8000 | 0.0005 / 0.0007 |   2.9000 / 5.7000 |
-| Chromium    | Salted SHA-256 |   0.0260 / 0.0520 | 0.0004 / 0.0009 |   0.0260 / 0.0600 |
+| Chromium    | Pedersen P-256 |   2.8000 / 5.1000 | 0.0004 / 0.0006 |   2.7000 / 5.3000 |
+| Chromium    | Salted SHA-256 |   0.0280 / 0.0500 | 0.0006 / 0.0010 |   0.0220 / 0.0360 |
 
 The numbers come from this machine and vary with load, browser, JIT warmup, and timer resolution. Compare methods _within_ an environment, not Node against Chromium. Opening is only serialization, so its tiny measured time is a timer-resolution estimate. [Latency figure](results/figures/latency.png) shows the comparison on a logarithmic scale.
 

@@ -63,6 +63,22 @@ function constantWork(a: string, b: string) {
   for (let i = 0; i < a.length; i++) difference |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return { equal: difference === 0, inspected: a.length };
 }
+function insecureAcceptOpening(commitment: string, move: number) {
+  // INSECURE-DEMO: no binding check.
+  return commitment.length > 0 && [1, 2, 3].includes(move);
+}
+function insecureAcceptDuplicate(existing: string[], incoming: string) {
+  // INSECURE-DEMO.
+  return existing.length >= 0 && /^[0-9a-f]+$/.test(incoming);
+}
+function insecureAcceptLateReveal(arrival: number) {
+  // INSECURE-DEMO: ignores deadline.
+  return Number.isFinite(arrival);
+}
+function insecureDisplayWinner(eventJson: string) {
+  // INSECURE-DEMO: no hash-chain check.
+  return (JSON.parse(eventJson) as { winner: string }).winner;
+}
 function auditEvent(seq: number, previous: string, eventJson: string): HashChainEvent {
   const event_type = 'round_resolved';
   const created_at = '2026-11-13T00:00:00.000Z';
@@ -136,7 +152,7 @@ export async function runAttack(id: AttackId): Promise<AttackResult> {
     }
     case 'A4': {
       const original = commitPedersen(Move.Rock);
-      const naiveAccepts = true; // INSECURE-DEMO: no opening check.
+      const naiveAccepts = insecureAcceptOpening(original.commitment, Move.Paper);
       return {
         id,
         vulnerableSuccess: naiveAccepts,
@@ -147,7 +163,7 @@ export async function runAttack(id: AttackId): Promise<AttackResult> {
     }
     case 'A5': {
       const commitment = commitPedersen(Move.Rock).commitment;
-      const naiveAcceptsCopy = true; // INSECURE-DEMO: no duplicate record.
+      const naiveAcceptsCopy = insecureAcceptDuplicate([commitment], commitment);
       const seen = new Set([commitment]);
       const signed1 = signedCommitmentMessage(ctx, 'pedersen', commitment);
       const signed2 = signedCommitmentMessage(
@@ -198,7 +214,7 @@ export async function runAttack(id: AttackId): Promise<AttackResult> {
     case 'A8': {
       const deadline = 1000;
       const arrival = 1001;
-      const naiveAccepts = true; // INSECURE-DEMO: no phase deadline.
+      const naiveAccepts = insecureAcceptLateReveal(arrival);
       const patchedAccepts = arrival <= deadline;
       return {
         id,
@@ -252,7 +268,7 @@ export async function runAttack(id: AttackId): Promise<AttackResult> {
       const second = auditEvent(2, first.hash, '{"winner":"bob"}');
       const original = verifyAuditChain([first, second]);
       const modified = { ...first, event_json: '{"winner":"mallory"}' };
-      const naiveAccepts = JSON.parse(modified.event_json) !== null; // INSECURE-DEMO: plain log.
+      const naiveAccepts = insecureDisplayWinner(modified.event_json) === 'mallory';
       return {
         id,
         vulnerableSuccess: original && naiveAccepts,
