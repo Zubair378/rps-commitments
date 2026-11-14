@@ -1,6 +1,7 @@
 import { p256, p256_hasher } from '@noble/curves/nist.js';
 import { bytesToHex, equalBytes, hexToBytes } from '@noble/curves/utils.js';
 import { sha256 } from '@noble/hashes/sha2.js';
+export { verifyAuditChain, type HashChainEvent } from './audit.js';
 
 export const H_SEED = 'CS3002-RPS-PEDERSEN-H-v1';
 export const H_DST = 'CS3002-RPS-PEDERSEN-v1';
@@ -109,6 +110,25 @@ export function verifyPedersen(
   } catch {
     return false;
   }
+}
+
+/** Classroom illustration: C(rock,r1) + C(paper,r2) = C(3,r1+r2). */
+export function homomorphicExample() {
+  const rock = commitPedersen(Move.Rock);
+  const paper = commitPedersen(Move.Paper);
+  const sumScalar =
+    (parseScalar(rock.blindingFactor) + parseScalar(paper.blindingFactor)) % point.Fn.ORDER;
+  const combined = parseCommitment(rock.commitment)
+    .add(parseCommitment(paper.commitment))
+    .toHex(true);
+  const expected = commitPedersen(Move.Scissors, sumScalar.toString(16).padStart(64, '0'));
+  return {
+    rock: rock.commitment,
+    paper: paper.commitment,
+    combined,
+    expected: expected.commitment,
+    equal: combined === expected.commitment,
+  };
 }
 
 function field(value: string): Uint8Array {

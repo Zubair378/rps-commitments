@@ -1,21 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Activity, BadgeCheck, ShieldAlert } from 'lucide-react';
+import { verifyAuditChain } from '@rps/crypto-core';
 import { api } from '../api.js';
 import type { AuditEvent } from '../types.js';
 import { EmptyState, Loading, PageTitle, StatusPill } from '../ui.js';
-
-async function verifyChain(events: AuditEvent[]) {
-  let previous = '0'.repeat(64);
-  for (const event of events) {
-    if (event.prev_hash !== previous || event.seq !== events.indexOf(event) + 1) return false;
-    const text = `${previous}|${event.seq}|${event.event_type}|${event.event_json}|${event.created_at}`;
-    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-    const hex = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
-    if (hex !== event.hash) return false;
-    previous = event.hash;
-  }
-  return true;
-}
 
 export function AuditPage() {
   const [events, setEvents] = useState<AuditEvent[]>([]);
@@ -24,9 +12,9 @@ export function AuditPage() {
   const [error, setError] = useState('');
   useEffect(() => {
     void api<AuditEvent[]>('/api/audit')
-      .then(async (data) => {
+      .then((data) => {
         setEvents(data);
-        setValid(await verifyChain(data));
+        setValid(verifyAuditChain(data));
       })
       .catch((cause) =>
         setError(cause instanceof Error ? cause.message : 'Could not load audit log.'),

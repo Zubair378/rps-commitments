@@ -2,6 +2,7 @@
   "name": "rps-commitments",
   "private": true,
   "version": "0.1.0",
+  "type": "module",
   "packageManager": "pnpm@12.18.0",
   "engines": {
     "node": ">=20.19 <21"
@@ -16,9 +17,18 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check:rng": "node scripts/check-rng.mjs",
-    "play:match": "tsx scripts/play-match.ts"
+    "play:match": "tsx scripts/play-match.ts",
+    "attacks": "tsx scripts/run-attacks.ts",
+    "bench": "tsx scripts/bench.ts",
+    "bench:timing": "tsx scripts/timing-study.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "report:pdf": "python scripts/export_report.py && tsx scripts/print_pdf.ts docs/.report-render.html docs/report.pdf",
+    "slides:pdf": "tsx scripts/print_pdf.ts docs/slides.html docs/slides.pdf slides",
+    "bench:browser": "tsx scripts/bench-browser.ts"
   },
   "devDependencies": {
+    "@rps/adversary-sim": "workspace:*",
+    "@rps/crypto-core": "workspace:*",
     "@playwright/test": "1.65.0",
     "@types/node": "^20.19.43",
     "eslint": "^9.39.5",
