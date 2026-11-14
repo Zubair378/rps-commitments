@@ -11,7 +11,9 @@ import { TournamentPage } from './pages/TournamentPage.js';
 import { MatchPage } from './pages/MatchPage.js';
 import { KeysPage } from './pages/KeysPage.js';
 import { AuditPage } from './pages/AuditPage.js';
-import { ComingSoonPage } from './pages/ComingSoonPage.js';
+import { AttackLabPage } from './pages/AttackLabPage.js';
+import { BenchmarkPage } from './pages/BenchmarkPage.js';
+import { HomomorphicLabPage } from './pages/HomomorphicLabPage.js';
 
 type AuthState = {
   user: User | null;
@@ -90,8 +92,9 @@ export function App() {
             }
           />
           <Route path="/audit" element={<AuditPage />} />
-          <Route path="/attack-lab" element={<ComingSoonPage kind="attacks" />} />
-          <Route path="/benchmarks" element={<ComingSoonPage kind="benchmarks" />} />
+          <Route path="/attack-lab" element={<AttackLabPage />} />
+          <Route path="/benchmarks" element={<BenchmarkPage />} />
+          <Route path="/homomorphic-lab" element={<HomomorphicLabPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

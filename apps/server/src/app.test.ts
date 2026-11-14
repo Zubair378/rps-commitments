@@ -161,6 +161,78 @@ describe('two-client match API', () => {
     expect(result.round.winner_user_id).toBe(alice.id);
   });
 
+  it('forfeits a late reveal and rejects the late opener', async () => {
+    const alice = await register('alice');
+    const bob = await register('bob');
+    const aliceKey = await signingKey(alice.cookie);
+    const bobKey = await signingKey(bob.cookie);
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/tournaments',
+      headers: { cookie: alice.cookie },
+      payload: { name: 'Reveal deadline test', capacity: 2 },
+    });
+    const tournamentId = created.json().id as string;
+    const joined = await app.inject({
+      method: 'POST',
+      url: `/api/tournaments/${tournamentId}/join`,
+      headers: { cookie: bob.cookie },
+    });
+    const matchId = joined.json().matchId as string;
+    for (const [player, key, move, blindingFactor] of [
+      [alice, aliceKey, 1, one],
+      [bob, bobKey, 2, two],
+    ] as const) {
+      const body = await signedBody({
+        tournamentId,
+        matchId,
+        playerId: player.id,
+        keyId: key.id,
+        privateKey: key.privateKey,
+        move,
+        blindingFactor,
+      });
+      expect(
+        (
+          await app.inject({
+            method: 'POST',
+            url: '/api/commit',
+            headers: { cookie: player.cookie },
+            payload: body,
+          })
+        ).statusCode,
+      ).toBe(201);
+    }
+    expect(
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/api/reveal',
+          headers: { cookie: alice.cookie },
+          payload: { matchId, roundNo: 1, move: 1, blindingFactor: one },
+        })
+      ).statusCode,
+    ).toBe(200);
+    await db
+      .updateTable('rounds')
+      .set({ reveal_deadline: '2000-01-01T00:00:00.000Z' })
+      .where('match_id', '=', matchId)
+      .execute();
+    const result = (await app.inject({ method: 'GET', url: `/api/matches/${matchId}` })).json();
+    expect(result.round.status).toBe('RESOLVED');
+    expect(result.round.winner_user_id).toBe(alice.id);
+    expect(
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/api/reveal',
+          headers: { cookie: bob.cookie },
+          payload: { matchId, roundNo: 1, move: 2, blindingFactor: two },
+        })
+      ).statusCode,
+    ).toBe(409);
+  });
+
   it('advances when both players act concurrently', async () => {
     const alice = await register('alice');
     const bob = await register('bob');

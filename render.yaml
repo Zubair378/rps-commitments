@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: rps-commitments
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: corepack enable && pnpm install --prod=false --frozen-lockfile && pnpm build
+    startCommand: pnpm --filter @rps/server start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_WEB
+        value: '1'
+      - key: DATABASE_URL
+        sync: false

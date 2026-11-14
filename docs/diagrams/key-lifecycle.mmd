@@ -1,0 +1,12 @@
+stateDiagram-v2
+  [*] --> NoKey
+  NoKey --> Active: Web Crypto generates non-extractable P-256 key
+  Active --> Registered: Public JWK registered with API
+  Registered --> Signed: Sign a context-bound commitment
+  Signed --> Registered: Next round
+  Registered --> Rotated: Generate replacement and revoke old key
+  Registered --> Revoked: Revoke after compromise or device loss
+  Rotated --> Registered: New key active
+  Revoked --> NoKey: Generate on next device
+  Rotated --> Historical: Old public key retained for verification
+  Revoked --> Historical: Old public key retained for verification

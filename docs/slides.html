@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cryptographic Commitments · Presentation</title>
+    <style>
+      @page {
+        size: 13.333in 7.5in;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #08171b;
+        color: #eaf5f0;
+        font-family: Arial, sans-serif;
+      }
+      .slide {
+        width: 13.333in;
+        height: 7.5in;
+        padding: 0.65in 0.8in;
+        page-break-after: always;
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at 85% 10%, #1d5045 0, transparent 28%), #08171b;
+      }
+      .slide:last-child {
+        page-break-after: auto;
+      }
+      .tag {
+        font-size: 13px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #79e2b3;
+        font-weight: 800;
+      }
+      .slide h1 {
+        font-size: 58px;
+        letter-spacing: -0.05em;
+        line-height: 1.05;
+        margin: 0.35in 0;
+      }
+      .slide h2 {
+        font-size: 47px;
+        letter-spacing: -0.04em;
+        line-height: 1.08;
+        margin: 0.23in 0 0.3in;
+      }
+      .slide p {
+        color: #c4dbd1;
+        font-size: 24px;
+        line-height: 1.35;
+      }
+      .accent {
+        color: #72e2b2;
+      }
+      .pill {
+        display: inline-block;
+        border: 1px solid #5ba98a;
+        border-radius: 10px;
+        padding: 13px 18px;
+        color: #a7e8c6;
+        font-size: 23px;
+        margin: 5px;
+      }
+      .row {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+      }
+      .column {
+        flex: 1;
+      }
+      .card {
+        background: #153b35;
+        border: 1px solid #4e967b;
+        border-radius: 18px;
+        padding: 25px;
+      }
+      .card strong {
+        font-size: 30px;
+      }
+      .card p {
+        font-size: 19px;
+        margin-bottom: 0;
+      }
+      .equation {
+        font-family: Consolas, monospace;
+        font-size: 62px;
+        color: #91e9bc;
+        margin: 1in 0 0.5in;
+      }
+      .big-number {
+        font-size: 62px;
+        font-weight: 900;
+        color: #8ee6b9;
+      }
+      .figure {
+        display: block;
+        max-width: 100%;
+        max-height: 5.2in;
+        object-fit: contain;
+        margin: auto;
+        border-radius: 11px;
+      }
+      .figure.wide {
+        width: 100%;
+        max-height: 5.3in;
+      }
+      .figure.small {
+        max-height: 4.6in;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+      .foot {
+        position: absolute;
+        bottom: 0.4in;
+        left: 0.8in;
+        color: #86aaa0;
+        font-size: 14px;
+        letter-spacing: 0.12em;
+      }
+      .slide-no {
+        position: absolute;
+        bottom: 0.4in;
+        right: 0.8in;
+        color: #86aaa0;
+        font-size: 14px;
+      }
+      .metric {
+        font-size: 48px;
+        color: #8be7b7;
+        font-weight: 900;
+      }
+      .sub {
+        font-size: 19px;
+        color: #a5c2b4;
+      }
+      .quiet {
+        font-size: 17px;
+        color: #a5c2b4;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide">
+      <div class="tag">CS-3002 · Information Security · Topic 13</div>
+      <h1>Play fair.<br /><span class="accent">Prove every move.</span></h1>
+      <p>Cryptographic commitments for rock–paper–scissors tournaments</p>
+      <div class="row" style="margin-top: 1in">
+        <span class="pill">Pedersen P-256</span><span class="pill">Commit → Reveal → Verify</span>
+      </div>
+      <div class="foot">RPS COMMITMENTS</div>
+      <div class="slide-no">01</div>
+    </section>
+    <section class="slide">
+      <div class="tag">The problem</div>
+      <h2>The second mover can cheat.</h2>
+      <div class="row" style="margin-top: 0.65in">
+        <div class="column card">
+          <strong>Player A</strong>
+          <p>Reveals rock first</p>
+        </div>
+        <div class="column card">
+          <strong>Player B</strong>
+          <p>Chooses paper afterward</p>
+        </div>
+      </div>
+      <p style="margin-top: 0.55in">A fair game must keep both moves hidden and fixed.</p>
+      <div class="slide-no">02</div>
+    </section>
+    <section class="slide">
+      <div class="tag">The protocol</div>
+      <h2>Commit. Reveal. Verify.</h2>
+      <div class="row" style="margin-top: 0.7in">
+        <div class="column card">
+          <div class="big-number">01</div>
+          <strong>Lock</strong>
+          <p>Publish a commitment, not the move.</p>
+        </div>
+        <div class="column card">
+          <div class="big-number">02</div>
+          <strong>Open</strong>
+          <p>Reveal move and random factor.</p>
+        </div>
+        <div class="column card">
+          <div class="big-number">03</div>
+          <strong>Check</strong>
+          <p>Verify opening and signature.</p>
+        </div>
+      </div>
+      <div class="slide-no">03</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Pedersen commitment</div>
+      <h2>Two properties, one point.</h2>
+      <div class="equation">C = m·g + r·h</div>
+      <div class="two">
+        <div class="card">
+          <strong>Hiding</strong>
+          <p>Uniform random r masks the move perfectly.</p>
+        </div>
+        <div class="card">
+          <strong>Binding</strong>
+          <p>Changing the move requires a discrete-log trapdoor.</p>
+        </div>
+      </div>
+      <div class="slide-no">04</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Architecture</div>
+      <h2>The browser keeps the secret.</h2>
+      <img class="figure wide" src="diagrams/architecture.png" alt="Architecture diagram" />
+      <div class="slide-no">05</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Live protocol</div>
+      <h2>Two browsers. One verifiable result.</h2>
+      <img
+        class="figure small"
+        src="results/ui/match-desktop.png"
+        alt="Verified match screenshot"
+      />
+      <div class="slide-no">06</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Attack lab</div>
+      <h2>Break the weak version.</h2>
+      <div class="two" style="margin-top: 0.4in">
+        <div class="card">
+          <strong>A1: Unsalted hash</strong>
+          <p>Three guesses reveal the move.</p>
+        </div>
+        <div class="card">
+          <strong>A3: Trapdoor h</strong>
+          <p>One commitment opens two ways.</p>
+        </div>
+        <div class="card">
+          <strong>A9: Replay</strong>
+          <p>Context-bound signatures stop reuse.</p>
+        </div>
+        <div class="card">
+          <strong>A10: Audit edit</strong>
+          <p>Hash-chain verification detects tampering.</p>
+        </div>
+      </div>
+      <div class="slide-no">07</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Measured performance</div>
+      <h2>Stronger hiding costs CPU.</h2>
+      <img class="figure wide" src="results/figures/latency.png" alt="Latency chart" />
+      <div class="slide-no">08</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Security vs usability</div>
+      <h2>One extra byte. More work.</h2>
+      <div class="two" style="margin-top: 0.7in">
+        <div class="card">
+          <strong>Pedersen</strong>
+          <p>33-byte point · perfect hiding · slower group operations</p>
+        </div>
+        <div class="card">
+          <strong>Salted SHA-256</strong>
+          <p>32-byte digest · computational hiding · faster hashing</p>
+        </div>
+      </div>
+      <p style="margin-top: 0.5in">Both require a signature and a later opening.</p>
+      <div class="slide-no">09</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Security boundaries</div>
+      <h2>What the proof cannot guarantee.</h2>
+      <div class="row" style="margin-top: 0.6in">
+        <div class="column card">
+          <strong>Server</strong>
+          <p>Can leak the first opening or rewrite its whole audit chain.</p>
+        </div>
+        <div class="column card">
+          <strong>Device</strong>
+          <p>A compromised browser can expose local secrets.</p>
+        </div>
+      </div>
+      <div class="slide-no">10</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Evidence and demo</div>
+      <h2>Tested from math to match.</h2>
+      <div class="row" style="margin-top: 0.6in">
+        <div class="column card">
+          <div class="metric">27</div>
+          <p>unit and API tests</p>
+        </div>
+        <div class="column card">
+          <div class="metric">10</div>
+          <p>attack demonstrations</p>
+        </div>
+        <div class="column card">
+          <div class="metric">1,000</div>
+          <p>samples per benchmark row</p>
+        </div>
+      </div>
+      <p class="quiet" style="margin-top: 0.55in">
+        Source, data, screenshots, and diagrams are committed to GitHub.
+      </p>
+      <div class="slide-no">11</div>
+    </section>
+    <section class="slide">
+      <div class="tag">Questions</div>
+      <h1>Can you trust<br /><span class="accent">the evidence?</span></h1>
+      <p>Openings and signatures: independently checkable. Referee behavior: visible limits.</p>
+      <div class="foot">github.com/Zubair378/rps-commitments</div>
+      <div class="slide-no">12</div>
+    </section>
+  </body>
+</html>

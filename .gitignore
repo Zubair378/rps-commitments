@@ -10,3 +10,4 @@ test-results/
 *.log
 .DS_Store
 .tools/
+docs/.report-render.html

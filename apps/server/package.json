@@ -8,6 +8,7 @@
     "start": "tsx src/main.ts"
   },
   "dependencies": {
+    "@fastify/static": "10.1.10",
     "@fastify/cookie": "^11.1.5",
     "@fastify/helmet": "^13.2.0",
     "@fastify/rate-limit": "^11.2.2",
@@ -18,7 +19,8 @@
     "fastify": "^5.12.8",
     "kysely": "~0.28.20",
     "pg": "^8.23.1",
-    "zod": "^4.6.7"
+    "zod": "^4.6.7",
+    "tsx": "4.23.15"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

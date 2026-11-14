@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-11-14T12:36:32.014Z",
+  "results": [
+    {
+      "id": "A1",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "Unsalted SHA-256 reveals move 2 in 3 guesses. The same guesses with an unknown 256-bit salt produce no match."
+    },
+    {
+      "id": "A2",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "Known PRNG seed predicts r=…4099b181 and reveals move 2. Predicting that r does not open a CSPRNG commitment."
+    },
+    {
+      "id": "A3",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "Known x=7 lets one point open as rock (r=11) or scissors (r'=49625181090152678041156048692603245798570123667486754432466682454743648019026). The same forged opening fails against the pinned generator.",
+      "limitation": "No experiment can prove an unknown discrete logarithm; the pinned hash-to-curve construction provides the binding assumption."
+    },
+    {
+      "id": "A4",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "A naive referee trusts a changed move. Pedersen opening verification rejects paper against a rock commitment."
+    },
+    {
+      "id": "A5",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "An unguarded match accepts the copied point. The referee rejects duplicates, and the signature payload changes with player ID."
+    },
+    {
+      "id": "A6",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "Early exit inspects 1 versus 64 characters. Fixed-work comparison inspects 64 in both cases.",
+      "limitation": "Operation counts demonstrate the branch difference; they do not establish a remotely exploitable timing leak."
+    },
+    {
+      "id": "A7",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "A length-only validator accepts a 33-byte identity-like encoding; strict compressed-point parsing rejects it."
+    },
+    {
+      "id": "A8",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "A reveal arriving one millisecond after the deadline is accepted without a timer and rejected by the referee deadline rule. The API test checks actual forfeit behavior."
+    },
+    {
+      "id": "A9",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "A signature over C alone verifies again in another round. A signature over tournament, match, round, player, mode, and C fails when round changes."
+    },
+    {
+      "id": "A10",
+      "vulnerableSuccess": true,
+      "patchedBlocked": true,
+      "evidence": "A plain log displays an altered winner. The browser verifier detects the changed event hash and broken chain.",
+      "limitation": "An operator could rewrite the entire chain without an external checkpoint."
+    }
+  ]
+}
