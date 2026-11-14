@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 
 test('two browser contexts commit, reveal, and verify a match', async ({ browser, page }) => {
@@ -28,22 +29,39 @@ test('two browser contexts commit, reveal, and verify a match', async ({ browser
   const matchUrl = page.url();
   await opponent.goto(matchUrl);
   await page.getByRole('button', { name: 'Paper' }).click();
+  const commitStarted = Date.now();
   const commitRequest = page.waitForRequest((request) => request.url().endsWith('/api/commit'));
   await page.getByRole('button', { name: /Commit my move/ }).click();
   const payload = JSON.parse((await commitRequest).postData() ?? '{}') as Record<string, unknown>;
   expect(payload).not.toHaveProperty('move');
   expect(payload).not.toHaveProperty('blindingFactor');
   await expect(page.getByText('Commitment locked in.')).toBeVisible();
+  const commitMilliseconds = Date.now() - commitStarted;
   await opponent.getByRole('button', { name: 'Rock' }).click();
   await opponent.getByRole('button', { name: /Commit my move/ }).click();
   await expect(page.getByRole('button', { name: /Reveal and verify/ })).toBeVisible();
   await expect(opponent.getByRole('button', { name: /Reveal and verify/ })).toBeVisible();
   await page.getByRole('button', { name: /Reveal and verify/ }).click();
+  const verifyStarted = Date.now();
   await expect(page.getByText('1 of 2 openings received.')).toBeVisible();
   await opponent.getByRole('button', { name: /Reveal and verify/ }).click();
   await expect(page.getByText('verified', { exact: true })).toHaveCount(2);
+  const verifyMilliseconds = Date.now() - verifyStarted;
   await expect(page.getByText(`${`alice_${suffix}`} wins the match`)).toBeVisible();
   await page.screenshot({ path: 'docs/results/ui/match-desktop.png', fullPage: true });
+  await writeFile(
+    'docs/results/ux-local.json',
+    JSON.stringify(
+      {
+        measuredAt: new Date().toISOString(),
+        environment: 'local Chromium to local Vite/Fastify/SQLite',
+        commitMilliseconds,
+        secondRevealToVerifiedMilliseconds: verifyMilliseconds,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
   await second.close();
 });
 

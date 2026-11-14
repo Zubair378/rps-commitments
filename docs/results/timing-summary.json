@@ -1,0 +1,20 @@
+{
+  "early-exit": {
+    "samples_per_condition": 2000,
+    "first_mean_ns": 6.065300000000001,
+    "first_sd_ns": 27.01356737495366,
+    "last_mean_ns": 194.7067,
+    "last_sd_ns": 220.14470177583195,
+    "welch_t": -38.03631972092103,
+    "welch_p": 3.0752329767737966e-240
+  },
+  "timingSafeEqual": {
+    "samples_per_condition": 2000,
+    "first_mean_ns": 256.5924,
+    "first_sd_ns": 317.50324746105224,
+    "last_mean_ns": 261.8311,
+    "last_sd_ns": 322.9800288598525,
+    "welch_t": -0.5172849616583465,
+    "welch_p": 0.6049858754919066
+  }
+}
