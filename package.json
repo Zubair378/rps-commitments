@@ -18,6 +18,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check:rng": "node scripts/check-rng.mjs",
     "play:match": "tsx scripts/play-match.ts",
+    "smoke:live": "tsx scripts/smoke-live.ts",
     "attacks": "tsx scripts/run-attacks.ts",
     "bench": "tsx scripts/bench.ts",
     "bench:timing": "tsx scripts/timing-study.ts",
