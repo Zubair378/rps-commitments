@@ -50,3 +50,5 @@ In another terminal, `Invoke-WebRequest http://127.0.0.1:3100/health` and `Invok
 ## 4. Public release gate
 
 After Render and a persistent PostgreSQL account are connected, verify `https://<assigned-host>/health`, the home page, two-profile play, a four-player bracket from different devices, key rotation, Attack Lab, and audit verification. Record the actual URL and cloud click/cold-start times in the README and report. The cloud gate is **not complete** until those checks are performed. A green local build alone is insufficient.
+
+Run `pnpm smoke:live https://<assigned-host>` to check the public endpoints and play a two-player API match. It creates two test accounts and a tournament in the target database. This does not replace the four-device browser check.
