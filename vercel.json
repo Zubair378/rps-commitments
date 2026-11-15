@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "corepack enable && pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://rps-commitments.onrender.com/api/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://rps-commitments.onrender.com/health"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
