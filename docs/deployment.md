@@ -4,7 +4,7 @@ The app can run as one free Render web service: the Node referee serves the buil
 
 ## Provisioning checklist
 
-1. Create a free Neon Postgres project. Copy its pooled connection string into a private password manager; require TLS (`sslmode=require`, or `verify-full` for hostname validation). Never commit it.
+1. Create a free Neon Postgres project. Copy its **direct**, non-pooled connection string into a private password manager; require TLS (`sslmode=require`, or `verify-full` for hostname validation). The Kysely migrator uses a session-level advisory lock, which requires a stable database session. Never commit the connection string.
 2. Connect this GitHub repository to Render and create a Blueprint from `render.yaml` on `main`. Choose the free plan and provide `DATABASE_URL` when prompted. The Blueprint builds the web client, starts the API, runs migrations at startup, and checks `/health`.
 3. Open the assigned `https://…onrender.com/health` URL, then the root page. Test two accounts in separate browser profiles, including commit, reveal, audit verification, and a 4-player bracket.
 4. Optionally connect Vercel after the Render URL is known. Configure an external rewrite for `/api/:path*` to the Render origin so browser requests stay same-origin. The browser has a 3-second polling fallback if WebSocket proxying is unavailable. Do not set `VITE_API_URL` to a cross-site API without revisiting cookie behavior.
