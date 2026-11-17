@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "installCommand": "npx --yes corepack@0.36.0 pnpm install --frozen-lockfile --filter @rps/web...",
-  "buildCommand": "npx --yes corepack@0.36.0 pnpm --filter @rps/web build",
+  "buildCommand": "VITE_WS_ORIGIN=https://rps-commitments.onrender.com npx --yes corepack@0.36.0 pnpm --filter @rps/web build",
   "outputDirectory": "apps/web/dist",
   "rewrites": [
     {

@@ -25,6 +25,10 @@ test('two browser contexts commit, reveal, and verify a match', async ({ browser
   await opponent.getByRole('button', { name: 'Join tournament' }).click();
   await expect(opponent.getByRole('link', { name: /MATCH 01/ })).toBeVisible();
   await page.reload();
+  const socketFrames: string[] = [];
+  page.on('websocket', (socket) => {
+    socket.on('framereceived', (frame) => socketFrames.push(frame.payload.toString()));
+  });
   await page.getByRole('link', { name: /MATCH 01/ }).click();
   const matchUrl = page.url();
   await opponent.goto(matchUrl);
@@ -38,7 +42,9 @@ test('two browser contexts commit, reveal, and verify a match', async ({ browser
   await expect(page.getByText('Commitment locked in.')).toBeVisible();
   const commitMilliseconds = Date.now() - commitStarted;
   await opponent.getByRole('button', { name: 'Rock' }).click();
+  const previousFrames = socketFrames.length;
   await opponent.getByRole('button', { name: /Commit my move/ }).click();
+  await expect.poll(() => socketFrames.length).toBeGreaterThan(previousFrames);
   await expect(page.getByRole('button', { name: /Reveal and verify/ })).toBeVisible();
   await expect(opponent.getByRole('button', { name: /Reveal and verify/ })).toBeVisible();
   await page.getByRole('button', { name: /Reveal and verify/ }).click();

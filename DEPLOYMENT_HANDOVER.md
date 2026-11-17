@@ -7,7 +7,7 @@ This guide is for the student and any assisting AI, including Claude. It describ
 - Repository: https://github.com/Zubair378/rps-commitments, branch `main`. Local Windows path: `E:\infosec_proj\rps-commitments`.
 - React/Vite frontend: `apps/web`; Fastify API and WebSocket server: `apps/server`; shared crypto: `packages/crypto-core`.
 - `render.yaml` defines a free Node web service, Node is pinned in `.node-version`, and `docs/VERIFY.md` explains functional checks. The server migrates the database at startup.
-- As of this handover, **no public URL, cloud PostgreSQL integration, or Vercel deployment has been verified**. Local SQLite and browser tests have passed; that does not prove Neon or either cloud deployment works.
+- On 17 November 2026, the Vercel site and Render API responded, a deployed two-browser match passed, and a four-player API bracket completed. Cloud database persistence after restart and four-device browser play remain unverified.
 - `AGENTS.md` already exists. Read it and `docs/MASTER_INSTRUCTIONS.md`; do not overwrite `AGENTS.md`.
 - Prior local results: 27 Vitest tests passed; Playwright reported 3 passed and 1 intentionally skipped benchmark. CI also passed. Run the checks again if code changes.
 
@@ -15,7 +15,7 @@ This guide is for the student and any assisting AI, including Claude. It describ
 
 Neon stores persistent PostgreSQL data. Render runs the API. Vercel serves the built React frontend and forwards `/api/*` and `/health` requests to Render. These rewrites keep API requests on the Vercel origin in the browser so the app's `Secure`, `HttpOnly`, `SameSite=Lax` session cookie can work. The frontend already polls for match updates every three seconds if WebSocket connection fails. Test this on the deployed system.
 
-**Missing prerequisite:** there is currently no `vercel.json` in the repository. Create it using the actual Render URL in step 4 before deploying Vercel. Do not set `VITE_API_URL` to the Render URL for this setup: cross-site cookies and CORS require a separate design and verification.
+`vercel.json` exists and routes API traffic to the Render URL. The following provisioning steps describe the original setup and should be adapted to the existing deployment. Do not set `VITE_API_URL` to the Render URL for this setup: cross-site cookies and CORS require a separate design and verification.
 
 The student's cloud accounts are available to them. Plugin installation alone does not prove a particular assistant can access those accounts. If tools are unavailable, guide the student through the dashboards; ask only for public URLs and sanitized error messages. Never ask for a password, API token, database URL, or other secret in chat. Do not publish, invent, or mark untested steps as complete.
 
@@ -41,7 +41,7 @@ The student's cloud accounts are available to them. Plugin installation alone do
 
 ## 4. Add the Vercel routing configuration
 
-The assisting AI can make this change; otherwise, edit it locally. Create a file named `vercel.json` at the **repository root**, replacing `https://YOUR-SERVICE.onrender.com` in both destinations with the real Render origin from step 3. Preserve `/api/:path*` in the destination:
+The assisting AI can make this change; otherwise, edit it locally. Review the existing `vercel.json` at the **repository root**; for a new deployment, replace `https://YOUR-SERVICE.onrender.com` in both destinations with the real Render origin from step 3. Preserve `/api/:path*` in the destination:
 
 ```json
 {
@@ -69,7 +69,7 @@ The origin is public; it is safe to commit. Never insert the Neon connection str
 ## 5. Deploy the frontend to Vercel
 
 1. In Vercel select **Add New → Project**, import the GitHub repository, and select `main`. Set **Root Directory** to the repository root, not `apps/web`, because the install and build use the pnpm workspace.
-2. Review the settings from `vercel.json`: Vite, install `corepack enable && pnpm install --frozen-lockfile`, build `pnpm build`, output `apps/web/dist`. Node must satisfy the root package's `>=20.19 <21` engine; verify the Node version in Vercel project settings and build logs.
+2. Review the settings from `vercel.json`: Vite, install `corepack enable && pnpm install --frozen-lockfile`, build `pnpm build`, output `apps/web/dist`. Node must satisfy the root package's `>=20.19 <27` engine; verify the Node version in Vercel project settings and build logs.
 3. Leave `VITE_API_URL` unset. The Neon `DATABASE_URL` belongs only in Render. Deploy and read the logs until Vercel reports success. Copy the public Vercel URL.
 4. Open the Vercel URL, then `/health` and `/api/params`. Each endpoint must reach Render and return HTTP 200. Refresh a client route such as `/audit`: it should load the React app, not a 404 page. The public Render site remains available as a useful independent fallback.
 

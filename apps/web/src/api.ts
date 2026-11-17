@@ -1,4 +1,5 @@
 const base = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? '';
+const websocketOrigin = (import.meta.env.VITE_WS_ORIGIN as string | undefined)?.replace(/\/$/, '');
 
 export class ApiError extends Error {
   constructor(
@@ -37,7 +38,7 @@ export async function api<T>(
 }
 
 export function wsUrl(path: string): string {
-  const url = new URL(path, base || window.location.origin);
-  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+  const url = new URL(path, websocketOrigin || base || window.location.origin);
+  url.protocol = url.protocol === 'https:' || url.protocol === 'wss:' ? 'wss:' : 'ws:';
   return url.toString();
 }

@@ -3,7 +3,7 @@
 **CS-3002 Information Security · Topic 13 · Technical report**  
 **Repository:** https://github.com/Zubair378/rps-commitments  
 **Team:** exactly three members; names and roll numbers to be confirmed in `TEAM.md`  
-**Live URL:** pending account connection and cloud verification
+**Live URL:** https://rps-commitments-mals.vercel.app/ (tested 17 November 2026; see deployment limitations below)
 
 ## Abstract and problem statement
 
@@ -23,7 +23,7 @@ An opponent may guess a move, copy a point, replay a signature, submit malformed
 
 ![Architecture and trust boundaries](diagrams/architecture.png)
 
-The React client generates keys, computes commitments, signs context, stores openings, and re-verifies public transcripts. Fastify manages sessions, tournament brackets, deadlines, signed commitments, reveals, results, WebSocket notifications, and the audit chain. SQLite is used locally; production requires persistent PostgreSQL. A same-origin Render deployment is prepared so HTTP-only session cookies do not depend on third-party cookie behavior. A spectator can read a match and public evidence without possessing either player's private key.
+The React client generates keys, computes commitments, signs context, stores openings, and re-verifies public transcripts. Fastify manages sessions, tournament brackets, deadlines, signed commitments, reveals, results, WebSocket notifications, and the audit chain. SQLite is used locally; production requires persistent PostgreSQL. Vercel serves the frontend and proxies API requests to the Render backend, allowing same-origin session cookies. A spectator can read a match and public evidence without possessing either player's private key.
 
 ![Commit–reveal–verify sequence](diagrams/sequence.png)
 
@@ -112,3 +112,11 @@ The course requires exactly three members, each with code commits and a defense-
 6. Render Blueprint specification: https://render.com/docs/blueprint-spec
 7. Render free service limitations: https://render.com/docs/free
 8. Vercel external rewrites: https://vercel.com/docs/routing/rewrites
+
+## Deployment verification update (17 November 2026)
+
+The public Vercel home, health, and parameters endpoints returned HTTP 200. A two-browser deployed match verified both openings and the correct winner; registration, session refresh, key rotation and revocation also worked. A separate four-player API test completed two semifinals and a final with the correct champion. The public audit chain verified in the browser. This does not replace a four-device browser test or a database persistence check after a backend restart. The Vercel WebSocket endpoint failed to connect in this test while the direct Render WebSocket opened; the deployed browser match progressed using the polling fallback.
+
+A further four-profile browser attempt reached a semifinal, then encountered an HTTP rate-limit error during a reveal after substantial test traffic. The server currently applies a global limit of 100 requests per minute. The precise effect of proxying and shared networks needs investigation and a repeat test before the multi-device demo; the rate limit should not simply be disabled.
+
+A subsequent local fix configures the Vercel build to connect match WebSockets directly to Render via `VITE_WS_ORIGIN` while leaving API traffic on the Vercel origin. The local end-to-end match received a WebSocket notification, and a production-configured local build opened the Render socket. Deployment and testing of that change on the public site remain pending.
