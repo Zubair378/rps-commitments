@@ -22,16 +22,16 @@ The React frontend is hosted on Vercel. Its REST API requests are routed to the 
 
 ## Evidence from this review
 
-| Check | Result | What it establishes |
-| --- | --- | --- |
-| GitHub Actions for fix commit `6ab14a4` | Passed | The branch's configured CI checks completed successfully. It is not merged into production. |
-| Desktop and mobile homepage, sign-in, Attack Lab, benchmarks | Loaded in Edge | The browser rendered these public pages on 25 November. |
-| Public `/api/params` | HTTP 200 in Edge | The browser reached the cryptographic parameters endpoint. Command-line requests got a Cloudflare HTTP 429 challenge, so automated CLI health checks were inconclusive. |
-| Public audit page | Hash chain verified in browser | Current public events passed the client verifier at the time of testing. This does not prevent a server from rewriting the entire chain. |
-| WebSocket at Vercel host | Failed to open | The production frontend route still does not provide the match WebSocket. |
-| WebSocket at Render host | Opened | The backend WebSocket endpoint was reachable from the same browser. |
-| Two-player browser match, key rotation/revocation, four-player API bracket | Passed in earlier 17 November tests | Useful prior evidence; these were not repeated on the new URL today. |
-| Four physical devices and database after restart | Not tested | Needs the team and Render dashboard. |
+| Check                                                                      | Result                              | What it establishes                                                                                                                                                     |
+| -------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GitHub Actions for fix commit `6ab14a4`                                    | Passed                              | The branch's configured CI checks completed successfully. It is not merged into production.                                                                             |
+| Desktop and mobile homepage, sign-in, Attack Lab, benchmarks               | Loaded in Edge                      | The browser rendered these public pages on 25 November.                                                                                                                 |
+| Public `/api/params`                                                       | HTTP 200 in Edge                    | The browser reached the cryptographic parameters endpoint. Command-line requests got a Cloudflare HTTP 429 challenge, so automated CLI health checks were inconclusive. |
+| Public audit page                                                          | Hash chain verified in browser      | Current public events passed the client verifier at the time of testing. This does not prevent a server from rewriting the entire chain.                                |
+| WebSocket at Vercel host                                                   | Failed to open                      | The production frontend route still does not provide the match WebSocket.                                                                                               |
+| WebSocket at Render host                                                   | Opened                              | The backend WebSocket endpoint was reachable from the same browser.                                                                                                     |
+| Two-player browser match, key rotation/revocation, four-player API bracket | Passed in earlier 17 November tests | Useful prior evidence; these were not repeated on the new URL today.                                                                                                    |
+| Four physical devices and database after restart                           | Not tested                          | Needs the team and Render dashboard.                                                                                                                                    |
 
 ## Screenshots from 25 November
 
