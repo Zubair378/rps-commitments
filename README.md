@@ -2,7 +2,7 @@
 
 A CS-3002 Information Security project that turns rock–paper–scissors into a verifiable commit–reveal tournament. Players choose moves locally, publish signed Pedersen P-256 or salted SHA-256 commitments, then reveal openings only after both commitments arrive. The referee runs two-player matches and 4/8-player brackets. A spectator can inspect public results and the hash-linked audit log.
 
-**Live URL:** pending cloud account connection and end-to-end verification. The app is runnable locally now. See [deployment preparation](docs/deployment.md) and the [technical report](docs/report.pdf).
+**Live URL:** https://rps-commitments-mals.vercel.app/ (backend: https://rps-commitments.onrender.com). On 17 November 2026, a two-browser match and a four-player API bracket passed. A four-device browser tournament and database persistence after restart remain to be verified. Vercel WebSocket connections failed in testing; the client uses polling. See [deployment preparation](docs/deployment.md) and the [technical report](docs/report.pdf).
 
 For a handover checklist with expected results and browser steps, follow [How to verify the project](docs/VERIFY.md).
 
@@ -53,6 +53,6 @@ Before reveal, a commit request contains only a commitment, mode, key ID, and si
 
 ## Limits, team, and license
 
-A malicious server could leak the first received opening before the second reveal or rewrite the entire audit chain without an external checkpoint. A lost browser tab may lose an opening and forfeit. Local and browser benchmarks are machine-specific; cloud latency is not yet measured. See the [threat model](docs/threat-model.md) and [attack notes](docs/attacks.md).
+A malicious server could leak the first received opening before the second reveal or rewrite the entire audit chain without an external checkpoint. A lost browser tab may lose an opening and forfeit. Local and browser benchmarks are machine-specific; cloud latency and persistence after restart have not yet been systematically measured. See the [threat model](docs/threat-model.md) and [attack notes](docs/attacks.md).
 
 The course requires exactly three members. [Team details](docs/TEAM.md), individual contributions, and the third roll number await confirmation; Git commits are attributed only to the account that made them. The team has not selected a reuse license, so no open-source license is granted yet.
