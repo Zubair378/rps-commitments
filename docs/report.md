@@ -183,6 +183,8 @@ On 27 November 2026, the updated application was run locally with four independe
 
 After the updated backend was deployed to Render, a new four-player tournament was tested on the public Vercel URL using four isolated browser profiles on one computer. The commit deadline was measured at 600 seconds. Both best-of-three semifinals and the final completed; both final-round openings in each match were verified in the browser, and the bracket reached COMPLETE with the expected champion. No rate-limit error was observed in this test. A single four-profile run cannot establish behavior under all traffic or replace a test on separate physical devices.
 
+![The live final result, with both openings verified.](results/student-screenshots/20-final-verified.png)
+
 ![Completed live tournament bracket, showing four players and resolved matches.](results/student-screenshots/21-live-complete-bracket.png)
 
 A completed four-player test tournament created before this backend redeploy, `e3a52fe8-f493-452a-a6e3-4c0fed6a4fc4`, remained accessible afterwards with four participants, three matches, and a final winner. This supports persistence across this redeployment; it does not independently identify the database provider or prove future durability.
