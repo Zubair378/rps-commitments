@@ -92,7 +92,7 @@ Vitest covers nine crypto properties and vectors, ten attack scenarios, and eigh
 
 ## 11. Deployment
 
-`render.yaml` prepares one free Render service using Node 20.20.2, a production build of the React client, Fastify static serving on the same origin, a PostgreSQL `DATABASE_URL`, and `/health`. A local production-style smoke test returned 200 for `/health`, `/`, a deep client route, and `/api/params`. [Deployment instructions](deployment.md) explain how to connect a persistent Neon database and verify the public URL. The cloud accounts are not connected to this coding session yet, so there is no verified live URL or cloud cold-start measurement. Render's free web service can spin down after inactivity; its local filesystem is ephemeral and unsuitable for the database.
+`render.yaml` prepares one free Render service using Node 20.20.2, a production build of the React client, Fastify static serving on the same origin, a PostgreSQL `DATABASE_URL`, and `/health`. A local production-style smoke test returned 200 for `/health`, `/`, a deep client route, and `/api/params`. [Deployment instructions](deployment.md) explain how to connect a persistent Neon database and verify the public URL. The public Vercel URL and Render API were reachable in browser tests. The actual database configuration and persistence after restart have not been independently verified, and no systematic cloud cold-start measurement has been recorded. Render's free web service can spin down after inactivity; its local filesystem is ephemeral and unsuitable for the database.
 
 ## 12. Limitations and future work
 
@@ -115,11 +115,11 @@ The course requires exactly three members, each with code commits and a defense-
 
 ## Deployment verification update (17 November 2026)
 
-The public Vercel home, health, and parameters endpoints returned HTTP 200. A two-browser deployed match verified both openings and the correct winner; registration, session refresh, key rotation and revocation also worked. A separate four-player API test completed two semifinals and a final with the correct champion. The public audit chain verified in the browser. This does not replace a four-device browser test or a database persistence check after a backend restart. The Vercel WebSocket endpoint failed to connect in this test while the direct Render WebSocket opened; the deployed browser match progressed using the polling fallback.
+The public Vercel home, health, and parameters endpoints returned HTTP 200. A two-browser deployed match verified both openings and the correct winner; registration, session refresh, key rotation and revocation also worked. A separate four-player API test completed two semifinals and a final with the correct champion. The public audit chain verified in the browser. This does not replace a four-device browser test or a database persistence check after a backend restart. At that time the Vercel WebSocket endpoint failed to connect while direct Render WebSocket opened; the deployed browser match progressed using polling.
 
 A further four-profile browser attempt reached a semifinal, then encountered an HTTP rate-limit error during a reveal after substantial test traffic. The server currently applies a global limit of 100 requests per minute. The precise effect of proxying and shared networks needs investigation and a repeat test before the multi-device demo; the rate limit should not simply be disabled.
 
-A subsequent local fix configures the Vercel build to connect match WebSockets directly to Render via `VITE_WS_ORIGIN` while leaving API traffic on the Vercel origin. The local end-to-end match received a WebSocket notification, and a production-configured local build opened the Render socket. Deployment and testing of that change on the public site remain pending.
+A subsequent local fix configures the Vercel build to connect match WebSockets directly to Render via `VITE_WS_ORIGIN` while leaving API traffic on the Vercel origin. The local end-to-end match received a WebSocket notification, and a production-configured local build opened the Render socket. The change was later merged and deployed; a subsequent live two-browser test received a match notification over the Render WebSocket.
 
 ## Classroom tournament test and screenshots (27 November 2026)
 
@@ -140,3 +140,41 @@ Multiple players encountered request-rate errors during the live tournament. A p
 ![A rate-limit error during the tournament.](results/user-tournament/rate-limit.png)
 
 The live two-player browser match on 25 November verified both openings and received a match update over the direct Render WebSocket. The course's four-device test and database-persistence test after restarting Render remain to be completed. The team names, roll numbers, and actual contributions still need confirmation before submission.
+
+## Student screenshots: application walkthrough
+
+The screenshots below were captured by the student during testing. They illustrate the interface and should be read alongside the measured results and limitations above. A screen showing a feature does not by itself establish a completed four-device test.
+
+### Homepage and player access
+
+![Homepage explaining fair play.](results/student-screenshots/01-homepage.png)
+
+![Player sign-in and account creation.](results/student-screenshots/02-sign-in.png)
+
+### Tournament and match workflow
+
+![Tournament lobby and available matches.](results/student-screenshots/03-tournament-lobby.png)
+
+![A tournament bracket and player information.](results/student-screenshots/04-tournament-bracket.png)
+
+![Match interface and the public verification section.](results/student-screenshots/05-match-result.png)
+
+### Security evaluation and evidence
+
+![Attack Lab experiments.](results/student-screenshots/06-attack-lab.png)
+
+![Benchmark measurements.](results/student-screenshots/07-benchmarks.png)
+
+![Signing-key management and revocation status.](results/student-screenshots/08-keys.png)
+
+![Audit log and browser integrity verification.](results/student-screenshots/09-audit-log.png)
+
+## Latest four-profile retest (27 November 2026)
+
+A fresh live test registered four independent browser profiles on one computer and created a four-player bracket. The test advanced into the next round but did not finish: one client did not reach the reveal control before the 30-second test timeout. This is not a complete tournament pass. The Render backend was still serving the old two-minute deadline during this check; a redeployment of the updated backend and a repeated test are required. Browser profiles on one computer do not replace a physical multi-device demonstration.
+
+## Local four-profile tournament after the timing change
+
+On 27 November 2026, the updated application was run locally with four independent browser profiles and an isolated SQLite database. Both best-of-three semifinals and the final completed; the browser verified both openings at the end of each match and the tournament reached COMPLETE. This is a local single-computer test of the updated code, not evidence that the Render backend has been updated or that four physical devices have passed.
+
+![Completed four-player bracket in the local test.](results/student-screenshots/13-local-complete-bracket.png)
