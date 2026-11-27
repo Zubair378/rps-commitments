@@ -1,6 +1,6 @@
 # Presentation cues (12 slides)
 
-1. Name the project, course, and core security question. Confirm three presenter names before class.
+1. Name the project, course, and core security question. Introduce Noor Fatima, Muhammad Zubair, and Hamayun.
 2. Ask who wins if one player reveals first. Introduce simultaneity as the fairness problem.
 3. Walk through commit, reveal, verify. Point out the move is absent from the commit request.
 4. Explain `m`, `r`, `g`, and `h`; distinguish perfect hiding from computational binding. Mention hash-to-curve and pinned `h`.

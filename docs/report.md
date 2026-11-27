@@ -2,7 +2,8 @@
 
 **CS-3002 Information Security · Topic 13 · Technical report**  
 **Repository:** https://github.com/Zubair378/rps-commitments  
-**Team:** exactly three members; names and roll numbers to be confirmed in `TEAM.md`  
+**Team:** Noor Fatima (24i-2012), Muhammad Zubair (24i-2095), Hamayun (24k-2011)
+
 **Live URL:** https://rps-commitments.vercel.app/ (see deployment verification below)
 
 ## Abstract and problem statement
@@ -100,7 +101,7 @@ The server sees an opening when the first player submits it and could leak it be
 
 ## 13. Team contributions
 
-The course requires exactly three members, each with code commits and a defense-ready understanding of all parts. `TEAM.md` contains three slots; names, roll numbers, GitHub usernames, and individual contributions are awaiting confirmation. Git history currently attributes repository commits to the account that performed them. No work is attributed to another member without evidence.
+The team comprises Noor Fatima (24i-2012), Muhammad Zubair (24i-2095), and Hamayun (24k-2011). Each member should be prepared to explain the design and defend the work. Individual contributions and GitHub usernames still require confirmation; Git history attributes commits to the account that performed them. No work is attributed to another member without evidence.
 
 ## 14. References
 
@@ -139,7 +140,7 @@ Multiple players encountered request-rate errors during the live tournament. The
 
 ![A rate-limit error during the tournament.](results/user-tournament/rate-limit.png)
 
-The live two-player browser match on 25 November verified both openings and received a match update over the direct Render WebSocket. A later four-profile live test and a post-redeploy persistence check are described below; testing on separate physical devices remains to be completed. The team names, roll numbers, and actual contributions still need confirmation before submission.
+The live two-player browser match on 25 November verified both openings and received a match update over the direct Render WebSocket. A later four-profile live test and a post-redeploy persistence check are described below; testing on separate physical devices remains to be completed. The team members and roll numbers are recorded; their individual contributions still need confirmation before submission.
 
 ## Student screenshots: application walkthrough
 
@@ -191,4 +192,4 @@ A completed four-player test tournament created before this backend redeploy, `e
 
 ![Earlier tournament remains available after the Render redeploy.](results/student-screenshots/22-data-after-redeploy.png)
 
-The live test created four accounts and a completed tournament in the project database. The team still needs to confirm the three members' identities and actual contributions, rehearse the demonstration, and verify any course-specific file naming instructions.
+The live test created four accounts and a completed tournament in the project database. The team still needs to confirm its actual individual contributions, rehearse the demonstration, and verify any course-specific file naming instructions.

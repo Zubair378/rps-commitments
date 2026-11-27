@@ -1,11 +1,11 @@
 # Team
 
-The course requires exactly three members. Confirm names, roll numbers, GitHub usernames, and the deadline before the first stage gate.
+The team consists of the following three members, as supplied by the student:
 
-| Role     | Name       | Roll number        | GitHub username |
-| -------- | ---------- | ------------------ | --------------- |
-| Member A | To confirm | i242095 (confirm)  | To confirm      |
-| Member B | To confirm | 24k-2011 (confirm) | To confirm      |
-| Member C | To confirm | To confirm         | To confirm      |
+| Name            | Roll number | GitHub username |
+| --------------- | ----------- | --------------- |
+| Noor Fatima     | 24i-2012    | To confirm      |
+| Muhammad Zubair | 24i-2095    | To confirm      |
+| Hamayun         | 24k-2011    | To confirm      |
 
-Deadline: to confirm. Presentation date: to confirm. Do not attribute commits to a member who did not make them.
+Individual contributions, GitHub usernames, and presentation date are to be confirmed. Attribute work only to the person who actually performed it.
