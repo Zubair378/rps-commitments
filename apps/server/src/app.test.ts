@@ -21,6 +21,29 @@ afterEach(async () => {
   await db.destroy();
 });
 
+it('allows shared gameplay traffic while limiting repeated sign-in attempts', async () => {
+  for (let i = 0; i < 120; i++) {
+    expect((await app.inject({ method: 'GET', url: '/health' })).statusCode).toBe(200);
+  }
+  for (let i = 0; i < 30; i++) {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/login',
+      payload: { username: 'missing_user', password: 'long-enough-password' },
+    });
+    expect(response.statusCode).toBe(401);
+  }
+  expect(
+    (
+      await app.inject({
+        method: 'POST',
+        url: '/api/login',
+        payload: { username: 'missing_user', password: 'long-enough-password' },
+      })
+    ).statusCode,
+  ).toBe(429);
+});
+
 async function register(username: string) {
   const response = await app.inject({
     method: 'POST',

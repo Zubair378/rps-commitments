@@ -59,7 +59,7 @@ export function MatchPage() {
   }, [id]);
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => void load(), 3000);
+    const timer = window.setInterval(() => void load(), 10000);
     let socket: WebSocket | null = null;
     try {
       socket = new WebSocket(wsUrl(`/ws/matches/${id}`));

@@ -58,6 +58,7 @@ const revealBody = z
 const routeId = z.object({ id: idSchema });
 const now = () => new Date().toISOString();
 const deadline = (seconds: number) => new Date(Date.now() + seconds * 1000).toISOString();
+const roundDeadlineSeconds = 600;
 
 function hashPassword(password: string): string {
   const salt = randomBytes(16);
@@ -228,7 +229,7 @@ async function advanceTournament(db: Kysely<DB>, match: DB['matches']) {
           match_id: id,
           round_no: 1,
           status: 'COMMIT',
-          commit_deadline: deadline(120),
+          commit_deadline: deadline(roundDeadlineSeconds),
           reveal_deadline: null,
           winner_user_id: null,
           created_at: now(),
@@ -343,7 +344,7 @@ async function resolveRound(
         match_id: match.id,
         round_no: round.round_no + 1,
         status: 'COMMIT',
-        commit_deadline: deadline(120),
+        commit_deadline: deadline(roundDeadlineSeconds),
         reveal_deadline: null,
         winner_user_id: null,
         created_at: now(),
@@ -385,7 +386,7 @@ async function getMatchAndRound(db: Kysely<DB>, matchId: string, roundNo?: numbe
 export async function buildApp(db: Kysely<DB>, production = false) {
   const app = Fastify({ logger: false, bodyLimit: 16 * 1024 });
   await app.register(helmet);
-  await app.register(rateLimit, { global: true, max: 100, timeWindow: '1 minute' });
+  await app.register(rateLimit, { global: true, max: 600, timeWindow: '1 minute' });
   await app.register(cookie);
   await app.register(websocket);
 
@@ -411,47 +412,55 @@ export async function buildApp(db: Kysely<DB>, production = false) {
   app.get('/health', async () => ({ ok: true }));
   app.get('/api/params', async () => PUBLIC_PARAMS);
 
-  app.post('/api/register', async (request, reply) => {
-    const body = z
-      .object({ username: usernameSchema, password: z.string().min(12).max(128) })
-      .strict()
-      .parse(request.body);
-    const exists = await db
-      .selectFrom('users')
-      .select('id')
-      .where('username', '=', body.username)
-      .executeTakeFirst();
-    if (exists) return reply.code(409).send({ error: 'username taken' });
-    const id = randomUUID();
-    await db
-      .insertInto('users')
-      .values({
-        id,
-        username: body.username,
-        password_hash: hashPassword(body.password),
-        created_at: now(),
-      })
-      .execute();
-    await setSessionUser(db, reply, id, production);
-    await appendAudit(db, 'user_registered', { userId: id });
-    return reply.code(201).send({ id, username: body.username });
-  });
+  app.post(
+    '/api/register',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const body = z
+        .object({ username: usernameSchema, password: z.string().min(12).max(128) })
+        .strict()
+        .parse(request.body);
+      const exists = await db
+        .selectFrom('users')
+        .select('id')
+        .where('username', '=', body.username)
+        .executeTakeFirst();
+      if (exists) return reply.code(409).send({ error: 'username taken' });
+      const id = randomUUID();
+      await db
+        .insertInto('users')
+        .values({
+          id,
+          username: body.username,
+          password_hash: hashPassword(body.password),
+          created_at: now(),
+        })
+        .execute();
+      await setSessionUser(db, reply, id, production);
+      await appendAudit(db, 'user_registered', { userId: id });
+      return reply.code(201).send({ id, username: body.username });
+    },
+  );
 
-  app.post('/api/login', async (request, reply) => {
-    const body = z
-      .object({ username: usernameSchema, password: z.string().min(1).max(128) })
-      .strict()
-      .parse(request.body);
-    const user = await db
-      .selectFrom('users')
-      .selectAll()
-      .where('username', '=', body.username)
-      .executeTakeFirst();
-    if (!checkPassword(body.password, user?.password_hash))
-      return reply.code(401).send({ error: 'invalid credentials' });
-    await setSessionUser(db, reply, user!.id, production);
-    return { id: user!.id, username: user!.username };
-  });
+  app.post(
+    '/api/login',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const body = z
+        .object({ username: usernameSchema, password: z.string().min(1).max(128) })
+        .strict()
+        .parse(request.body);
+      const user = await db
+        .selectFrom('users')
+        .selectAll()
+        .where('username', '=', body.username)
+        .executeTakeFirst();
+      if (!checkPassword(body.password, user?.password_hash))
+        return reply.code(401).send({ error: 'invalid credentials' });
+      await setSessionUser(db, reply, user!.id, production);
+      return { id: user!.id, username: user!.username };
+    },
+  );
   app.post('/api/logout', async (request, reply) => {
     const token = request.cookies.rps_session;
     if (token && /^[0-9a-f]{64}$/.test(token)) {
@@ -711,7 +720,7 @@ export async function buildApp(db: Kysely<DB>, production = false) {
             match_id: matchId,
             round_no: 1,
             status: 'COMMIT',
-            commit_deadline: deadline(120),
+            commit_deadline: deadline(roundDeadlineSeconds),
             reveal_deadline: null,
             winner_user_id: null,
             created_at: now(),
@@ -882,7 +891,7 @@ export async function buildApp(db: Kysely<DB>, production = false) {
     if (accepted.length === 2)
       await db
         .updateTable('rounds')
-        .set({ status: 'REVEAL', reveal_deadline: deadline(120) })
+        .set({ status: 'REVEAL', reveal_deadline: deadline(roundDeadlineSeconds) })
         .where('id', '=', round.id)
         .where('status', '=', 'COMMIT')
         .execute();
