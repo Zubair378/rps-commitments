@@ -3,7 +3,7 @@
 **CS-3002 Information Security · Topic 13 · Technical report**  
 **Repository:** https://github.com/Zubair378/rps-commitments  
 **Team:** exactly three members; names and roll numbers to be confirmed in `TEAM.md`  
-**Live URL:** https://rps-commitments-mals.vercel.app/ (tested 17 November 2026; see deployment limitations below)
+**Live URL:** https://rps-commitments.vercel.app/ (see deployment verification below)
 
 ## Abstract and problem statement
 
@@ -120,3 +120,23 @@ The public Vercel home, health, and parameters endpoints returned HTTP 200. A tw
 A further four-profile browser attempt reached a semifinal, then encountered an HTTP rate-limit error during a reveal after substantial test traffic. The server currently applies a global limit of 100 requests per minute. The precise effect of proxying and shared networks needs investigation and a repeat test before the multi-device demo; the rate limit should not simply be disabled.
 
 A subsequent local fix configures the Vercel build to connect match WebSockets directly to Render via `VITE_WS_ORIGIN` while leaving API traffic on the Vercel origin. The local end-to-end match received a WebSocket notification, and a production-configured local build opened the Render socket. Deployment and testing of that change on the public site remain pending.
+
+## Classroom tournament test and screenshots (27 November 2026)
+
+Four separate player accounts joined a tournament. In the first semifinal, Amna beat Zubair 2–0; the screenshot shows the second-round openings for both players verified in the browser. The page also displayed a rate-limit error, so this is evidence of that verified round, not evidence that the entire four-player tournament passed without interruption.
+
+![Amna wins the semifinal; both openings are verified.](results/user-tournament/verified-semifinal.png)
+
+The second semifinal recorded AbdulMoiz as winner. The displayed round had no openings and both entries were unverified. That result cannot be presented as proof that both players successfully opened their commitments. A timeout is a possible explanation, but the screenshot alone does not establish the exact cause.
+
+![Second semifinal result, showing missing openings and unverified status.](results/user-tournament/unverified-semifinal.png)
+
+The public audit page verified 215 linked events in the user's browser. A complete server-side rewrite remains possible without an external checkpoint.
+
+![The browser verifies the audit hash chain.](results/user-tournament/audit.png)
+
+Multiple players encountered request-rate errors during the live tournament. A proposed update reduces match polling from 3 to 10 seconds, increases the general request budget from 100 to 600 per minute, keeps a separate 30-per-minute limit for each login and registration route, and increases the commit/reveal deadline from 2 to 10 minutes. This is a trade-off: longer deadlines give players more time but also lengthen potential waiting for a non-responsive player; the larger shared budget needs monitoring. The updated behavior has local automated coverage but must be deployed to both frontend and backend and retested with four players before claiming that the problem is resolved in production.
+
+![A rate-limit error during the tournament.](results/user-tournament/rate-limit.png)
+
+The live two-player browser match on 25 November verified both openings and received a match update over the direct Render WebSocket. The course's four-device test and database-persistence test after restarting Render remain to be completed. The team names, roll numbers, and actual contributions still need confirmation before submission.
