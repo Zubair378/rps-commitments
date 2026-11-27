@@ -193,3 +193,13 @@ A completed four-player test tournament created before this backend redeploy, `e
 ![Earlier tournament remains available after the Render redeploy.](results/student-screenshots/22-data-after-redeploy.png)
 
 The live test created four accounts and a completed tournament in the project database. The team still needs to confirm its actual individual contributions, rehearse the demonstration, and verify any course-specific file naming instructions.
+
+## Tournament using the team's existing accounts
+
+The team provided four signed-in player profiles: Zubair, Humayun, NoorFatima, and Abdulmoiz. A live tournament named “Khelo kudo aish kro” was played using those four Chrome profiles on the same computer. Both semifinals completed, Zubair and NoorFatima advanced, and Zubair won the final. The browser independently verified both final-round openings. The screenshots below record this tournament.
+
+![Completed bracket with the four existing player accounts and Zubair as champion.](results/user-tournament/team-existing-bracket.png)
+
+![Final result with both openings verified in the browser.](results/user-tournament/team-existing-final.png)
+
+Separately, the student reported that the team completed a tournament on four computers. The automated evidence above is from four browser profiles on one computer; the separate-device claim has not been independently verified in this report.
